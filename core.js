@@ -1,4 +1,4 @@
-export const VERSION = '1.0.0';
+export const VERSION = '1.0.2';
 export const COLORS = ['rose', 'lavender', 'sky', 'mint', 'peach', 'butter'];
 export const localISO = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 export function parseISO(iso) { const [y,m,d] = iso.split('-').map(Number); return new Date(y,m-1,d,12); }
