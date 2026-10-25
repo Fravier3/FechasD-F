@@ -1,5 +1,5 @@
-const CACHE = 'fechasdf-shell-1.0.0';
-const FILES = ['./','./index.html','./styles.css?v=1.0.0','./app.js?v=1.0.0','./core.js','./config.js','./manifest.webmanifest','./icon-180.png','./icon-192.png','./icon-512.png'];
+const CACHE = 'fechasdf-shell-1.0.2';
+const FILES = ['./','./index.html','./styles.css?v=1.0.2','./app.js?v=1.0.2','./core.js','./config.js','./manifest.webmanifest','./icon-180.png','./icon-192.png','./icon-512.png'];
 self.addEventListener('install', event => {event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES)).then(() => self.skipWaiting()));});
 self.addEventListener('activate', event => {event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key=>key.startsWith('fechasdf-shell-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch', event => {
