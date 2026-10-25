@@ -22,11 +22,14 @@ jobs:
         uses: actions/configure-pages@v5
         with:
           enablement: true
-      - name: Preparar archivos públicos
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verificar y compilar versión atómica
         run: |
-          mkdir -p _site
-          cp index.html styles.css app.js core.js config.js sw.js manifest.webmanifest version.json icon-180.png icon-192.png icon-512.png _site/
-          touch _site/.nojekyll
+          npm run check
+          npm test
+          npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

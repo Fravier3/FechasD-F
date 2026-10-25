@@ -27,3 +27,14 @@ Los rangos incluyen inicio y fin, incluso al cruzar años. Los aniversarios de u
 ## Desarrollo
 
 `npm run check` comprueba sintaxis. `npm test` comprueba rangos, aniversarios, fechas válidas y celdas del calendario. No se necesitan dependencias para ejecutar la app. El workflow de Pages publica únicamente los archivos de la app, sin pruebas ni SQL.
+
+## Versión 1.1.0
+
+- Cada recuerdo anual explica el año original en la agenda mensual y en su detalle únicamente cuando se consulta una repetición posterior. Los cumpleaños aclaran el año de nacimiento. Los registros originales no se modifican.
+- Icono cinematográfico 3D creado con la fotografía y el diseño aprobados como referencias. PNG opacos de 180, 192 y 512 píxeles; los iconos en el contenido usan el mismo recurso que el manifest.
+- `npm run build` crea una compilación inmutable con una huella de contenido. Cada cambio en un archivo de la app genera automáticamente un identificador nuevo, sin depender de recordar aumentar manualmente la versión.
+- El Service Worker descarga primero la versión completa y verifica el HTML. La activación espera la conformidad de todas las ventanas; un formulario abierto o un guardado bloquea la activación. Las ventanas sin trabajo abierto que están en segundo plano permiten preparar la actualización y recargan al volver al primer plano.
+- El HTML mantiene una ruta estable; los módulos, estilos e iconos usan rutas de versión. Perfil, acceso privado y datos locales se conservan. La navegación sin conexión usa una versión completa y solo se limpian cachés antiguas de esta app.
+- iOS decide cuándo refrescar el icono de una PWA ya instalada: las rutas nuevas de manifest/apple-touch-icon ayudan, pero no garantizan que iOS cambie el icono inmediatamente. Las funciones y contenidos se actualizan sin reinstalar.
+
+La foto original y el montaje de referencia no se publican en el repositorio. Solo se publican los iconos solicitados.

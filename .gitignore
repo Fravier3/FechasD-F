@@ -1,5 +1,6 @@
 node_modules/
 _site/
+releases/
 test-results/
 playwright-report/
 *.private.*
