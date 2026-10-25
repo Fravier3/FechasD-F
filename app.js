@@ -1,6 +1,7 @@
 import { VERSION, ICON_URL, COLORS, localISO, parseISO, validDate, fullDate, prettyRange, eventsOnDate, monthCells, daysBetween, nextAnnual, validateEvent, recurrenceInfo, escapeHTML as esc } from './core.js';
 import { createUpdateManager, safeToReload } from './updates.js';
 import { SUPABASE_URL, SUPABASE_KEY } from './config.js';
+import { unlockWithCode } from './access.js';
 
 const $ = id => document.getElementById(id);
 const STORAGE = 'fechasdf-v1';
@@ -41,13 +42,13 @@ function toast(message){$('toast').textContent=message;$('toast').classList.remo
 function updateProfile(){ $('profile-initial').textContent=person?.[0]||'?';$('profile-name').textContent=person||'Elegir'; }
 function setStatus(text,isOnline=online){$('sync-label').textContent=text;$('sync').classList.toggle('offline',!isOnline);$('sync').title=text+' · Toca para actualizar';}
 function alertNotice(message=''){const el=$('notice');el.textContent=message;el.classList.toggle('hidden',!message);}
-function privateURL(){return new URL('./',location.href).href+'#access='+access;}
+function privateURL(){return new URL('./',location.href).href;}
 async function api(path,{method='GET',body}={}){
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),16000);
   try{
     const response=await fetch(SUPABASE_URL+'/rest/v1/'+path,{method,headers:{apikey:SUPABASE_KEY,'x-client-info':'fechasdf/'+access,'Content-Type':'application/json',Prefer:'return=representation'},body:body===undefined?undefined:JSON.stringify(body),cache:'no-store',signal:controller.signal});
     const text=await response.text();let payload;try{payload=text?JSON.parse(text):null}catch{throw Error('No se pudo leer la respuesta. Intenta de nuevo.');}
-    if(!response.ok){if(response.status===401||response.status===403)throw Error('No se pudo verificar el acceso. Abre otra vez el enlace privado.');throw Error(payload?.message?.includes('check constraint')?'Revisa las fechas y los campos del formulario.':'No se pudo guardar o cargar. Vuelve a intentarlo.');}
+    if(!response.ok){if(response.status===401||response.status===403)throw Error('No se pudo verificar el acceso. Escribe el código nuevamente.');throw Error(payload?.message?.includes('check constraint')?'Revisa las fechas y los campos del formulario.':'No se pudo guardar o cargar. Vuelve a intentarlo.');}
     return payload;
   }catch(err){if(err.name==='AbortError')throw Error('La conexión tardó demasiado. Intenta de nuevo.');if(err instanceof TypeError)throw Error('Sin conexión. Conecta el teléfono y vuelve a intentar.');throw err;}finally{clearTimeout(timer);}
 }
@@ -57,7 +58,7 @@ async function sync({silent=false}={}){
   loading=true;setStatus('Sincronizando…');
   try{
     const allowed=await api('rpc/df_has_access',{method:'POST',body:{}});
-    if(allowed!==true){verified=false;online=false;events=[];details=[];renderAccess('Este enlace no tiene acceso. Usa el enlace privado compartido.');return;}
+    if(allowed!==true){verified=false;online=false;events=[];details=[];access='';store.set('access','');renderAccess('Escribe el código para entrar a su espacio.');return;}
     const [remoteEvents,remoteDetails]=await Promise.all([api('df_events?select=*&order=start_date.asc,created_at.asc'),api('df_details?select=*&order=sort_order.asc,created_at.asc')]);
     events=remoteEvents;details=remoteDetails;verified=true;online=true;lastSync=Date.now();
     store.set('snapshot',{access,events,details});setStatus('Sincronizado',true);alertNotice();renderSection();
@@ -68,15 +69,21 @@ function showChooser(){if(busy)return;$('chooser-close').classList.toggle('hidde
 $('chooser').addEventListener('cancel',e=>{if(!person)e.preventDefault();});
 document.querySelectorAll('[data-person]').forEach(button=>button.onclick=()=>{person=button.dataset.person;if(!store.set('person',person))toast('Este navegador no permite recordar el perfil.');updateProfile();$('chooser').close();renderSection();});
 $('chooser-close').onclick=()=>$('chooser').close();$('profile').onclick=showChooser;
-$('share').onclick=async()=>{if(!access)return;try{if(navigator.share)await navigator.share({title:'Nuestro espacio · Fran & Diana',url:privateURL()});else{await navigator.clipboard.writeText(privateURL());toast('Enlace privado copiado. Compártelo solo entre ustedes.');}}catch(err){if(err.name!=='AbortError')toast('No se pudo compartir. Abre el enlace privado original.');}};
+$('share').onclick=async()=>{try{if(navigator.share)await navigator.share({title:'Nuestro espacio · Fran & Diana',url:privateURL()});else{await navigator.clipboard.writeText(privateURL());toast('Enlace de la app copiado.');}}catch(err){if(err.name!=='AbortError')toast('No se pudo compartir el enlace.');}};
 $('chooser-share').onclick=()=>$('share').click();
 $('sync').onclick=()=>sync();
 function route(){const key=location.hash.slice(1);section=sections.some(([id])=>id===key)?key:'dashboard';if(!access){renderAccess();return;}if(verified)renderSection();}
 window.addEventListener('hashchange',route);
-function renderAccess(message='Abre el enlace privado para ver su espacio compartido.'){
+function renderAccess(message='Escribe el código que comparten para entrar.'){
   $('add').classList.add('hidden');$('page-title').textContent='Nuestro espacio.';$('page-description').textContent='Sus recuerdos, en un solo lugar.';$('eyebrow').textContent='FRAN & DIANA';
-  $('content').innerHTML=`<div class="access-screen"><img src="${ICON_URL}" alt="Una pareja con corazones"><h2>Un espacio para los dos</h2><p>${esc(message)}</p><form id="access-form"><label for="access-link">Pega aquí el enlace privado</label><input id="access-link" type="url" placeholder="https://…/#access=…" required autocomplete="off"><button class="button primary full">Abrir nuestro espacio</button></form></div>`;
-  $('access-form').onsubmit=e=>{e.preventDefault();try{const url=new URL($('access-link').value);const token=new URLSearchParams(url.hash.slice(1)).get('access');if(!token||!/^[A-Za-z0-9_-]{40,64}$/.test(token))throw Error();access=token;store.set('access',access);verified=false;events=[];details=[];sync();}catch{toast('Pega el enlace privado completo que contiene #access=.');}};
+  $('content').innerHTML=`<div class="access-screen"><img src="${ICON_URL}" alt="Una pareja con corazones"><h2>Bienvenidos a su espacio</h2><p>${esc(message)}</p><form id="access-form"><label for="access-code">Código de acceso</label><input id="access-code" type="password" inputmode="numeric" pattern="[0-9]{4}" minlength="4" maxlength="4" placeholder="• • • •" required autocomplete="off" aria-describedby="access-hint"><p id="access-hint" class="access-hint">Son cuatro números. Este teléfono recordará el acceso.</p><p id="access-error" class="form-error hidden" role="alert"></p><button id="access-submit" class="button primary full">Entrar</button></form></div>`;
+  $('access-code').oninput=()=>{$('access-code').value=$('access-code').value.replace(/\D/g,'').slice(0,4);$('access-error').classList.add('hidden');};
+  $('access-form').onsubmit=async e=>{
+    e.preventDefault();if(busy)return;busy=true;const button=$('access-submit');button.disabled=true;button.textContent='Abriendo…';
+    try{const token=await unlockWithCode($('access-code').value,{url:SUPABASE_URL,key:SUPABASE_KEY});access=token;store.set('access',access);verified=false;events=[];details=[];busy=false;await sync();}
+    catch(error){$('access-error').textContent=error.message;$('access-error').classList.remove('hidden');$('access-code').select();}
+    finally{busy=false;if(button.isConnected){button.disabled=false;button.textContent='Entrar';}}
+  };
 }
 const personName=p=>details.find(d=>d.person===p&&d.label.toLowerCase()==='nombre completo')?.value||p;
 function renderSection(){
@@ -145,7 +152,7 @@ window.addEventListener('offline',()=>{online=false;setStatus('Sin conexión',fa
 window.addEventListener('online',()=>sync({silent:true}));
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){sync({silent:true});updater.check();}});
 setInterval(()=>{if(document.visibilityState==='visible'&&Date.now()-lastSync>25000)sync({silent:true});},30000);
-const hasOpenWork=()=>busy||!!document.querySelector('dialog[open]')||!!document.querySelector('#access-link')?.value;
+const hasOpenWork=()=>busy||!!document.querySelector('dialog[open]')||!!document.querySelector('#access-code')?.value;
 const updater=createUpdateManager({version:VERSION,canActivate:()=>!hasOpenWork(),canReload:()=>safeToReload({busy,dialogsOpen:hasOpenWork(),hidden:document.visibilityState!=='visible'}),onPending:()=>toast('Hay una actualización lista. Se aplicará cuando cierres el formulario.')});
 document.querySelectorAll('dialog').forEach(dialog=>dialog.addEventListener('close',()=>updater.resume()));
 window.addEventListener('pageshow',()=>updater.check());

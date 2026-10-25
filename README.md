@@ -4,11 +4,11 @@ App compartida con Dashboard, calendario independiente y fichas editables de Dia
 
 ## Uso
 
-Abrir el enlace privado completo una vez y elegir Fran o Diana. El dispositivo recuerda el perfil y el acceso. Los datos se guardan en Supabase y se consultan al abrir, al regresar a la app y periódicamente mientras está visible.
+Abrir la dirección normal de la app, escribir el código compartido de cuatro números y elegir Fran o Diana. El dispositivo recuerda el perfil y el acceso. Los datos se guardan en Supabase y se consultan al abrir, al regresar a la app y periódicamente mientras está visible.
 
-El nombre elegido es una preferencia local, no una identidad verificada. Quien posea el enlace privado puede consultar y editar el espacio compartido. El enlace no se incluye en el repositorio público. Se puede compartir desde la app; en un teléfono pequeño, tocar el perfil y usar el botón para compartir acceso.
+El nombre elegido es una preferencia local. El código se verifica en la función de servidor `fechas-access`; no está en el frontend ni en el repositorio. Hay un límite de cinco intentos incorrectos por origen de red en quince minutos, además de un límite global de protección. Tras verificarlo, se devuelve la capacidad privada existente y se conserva localmente. Los accesos ya guardados y los enlaces privados anteriores siguen funcionando.
 
-Para instalar en iPhone: abrir en Safari, Compartir → Añadir a pantalla de inicio. Si iOS abre una instalación con almacenamiento separado, pegar el enlace privado una sola vez en la pantalla inicial. No se necesita correo ni contraseña.
+Para instalar en iPhone: abrir en Safari, Compartir → Añadir a pantalla de inicio. Si iOS abre una instalación con almacenamiento separado, introducir el código compartido una sola vez en esa instalación. No se necesita correo ni contraseña ni pegar enlaces.
 
 ## Datos y acceso
 

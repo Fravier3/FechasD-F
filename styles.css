@@ -7,3 +7,5 @@
 @media(prefers-reduced-motion:no-preference){.date-card,.detail-card{animation:appear .32s ease both}@keyframes appear{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}}
 
 .original-year-note{display:block;margin:8px 0 0!important;padding:10px 12px;border-radius:10px;background:#eaf2ff;color:#41628a!important;font-size:14px!important;line-height:1.55;letter-spacing:0}.agenda-item .original-year-note{padding:9px 10px}.day-event .original-year-note{margin:10px 0!important}.occurrence-date{font-size:12px!important;color:#8b7486!important;margin:5px 0!important}.app-version{font-size:10px;margin-left:9px;opacity:.8}.story-art{mix-blend-mode:normal;border-radius:22px}.chooser-art{border-radius:22px}
+
+#access-code{text-align:center;font:600 27px var(--heading);letter-spacing:12px;padding:16px 12px;min-height:66px}#access-code::placeholder{letter-spacing:7px;color:#b49aab}.access-hint{font-size:12px!important;line-height:1.6;margin-top:10px!important}

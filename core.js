@@ -1,4 +1,4 @@
-export const VERSION = '1.1.0';
+export const VERSION = '1.2.0';
 export const ICON_URL = './icon-192.png';
 export const COLORS = ['rose', 'lavender', 'sky', 'mint', 'peach', 'butter'];
 export const localISO = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;

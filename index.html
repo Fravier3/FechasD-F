@@ -13,7 +13,7 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./icon-180.png">
   <link rel="icon" type="image/png" href="./icon-192.png">
-  <link rel="stylesheet" href="./styles.css?v=1.1.0">
+  <link rel="stylesheet" href="./styles.css?v=1.2.0">
 </head>
 <body>
   <div class="app-shell">
@@ -21,7 +21,7 @@
       <a class="wordmark" href="#dashboard" aria-label="Ir a Dashboard"><img src="./icon-192.png" alt=""><span>Fran <i>&</i> Diana<small>NUESTRO ESPACIO</small></span></a>
       <nav class="desktop-nav" aria-label="Secciones principales"></nav>
       <div class="sidebar-note"><span data-icon="heart"></span><p>Lo nuestro,<br>en los pequeños detalles.</p></div>
-      <button id="share" class="share-link" type="button"><span data-icon="link"></span>Compartir acceso</button>
+      <button id="share" class="share-link" type="button"><span data-icon="link"></span>Compartir app</button>
     </aside>
     <div class="main-shell">
       <header class="topbar"><a class="mobile-brand" href="#dashboard"><img src="./icon-192.png" alt="">Fran & Diana</a><span class="desktop-top-label">Un espacio para los dos</span><div class="top-actions"><button class="sync-state" id="sync" title="Actualizar datos"><span class="sync-dot"></span><span id="sync-label">Conectando</span></button><button id="profile" class="profile-switch" aria-label="Elegir o cambiar perfil"><span id="profile-initial">?</span><span id="profile-name">Elegir</span><span data-icon="chevron-down"></span></button></div></header>
@@ -34,10 +34,10 @@
     </div>
   </div>
   <nav class="bottom-nav" aria-label="Secciones principales"></nav>
-  <dialog id="chooser" aria-labelledby="chooser-title"><div class="chooser-content"><img src="./icon-192.png" class="chooser-art" alt="Una pareja con corazones"><p class="eyebrow">BIENVENIDO A NUESTRO ESPACIO</p><h2 id="chooser-title">¿Quién está por aquí?</h2><p>Elige tu perfil. Lo recordaremos en este teléfono.</p><div class="profile-options"><button data-person="Fran"><span class="avatar fran">F</span><strong>Soy Fran</strong><span>Puerto Rico</span></button><button data-person="Diana"><span class="avatar diana">D</span><strong>Soy Diana</strong><span>Colombia</span></button></div><button class="text-button" id="chooser-share">Compartir acceso privado</button><button class="text-button" id="chooser-close">Cancelar</button></div></dialog>
+  <dialog id="chooser" aria-labelledby="chooser-title"><div class="chooser-content"><img src="./icon-192.png" class="chooser-art" alt="Una pareja con corazones"><p class="eyebrow">BIENVENIDO A NUESTRO ESPACIO</p><h2 id="chooser-title">¿Quién está por aquí?</h2><p>Elige tu perfil. Lo recordaremos en este teléfono.</p><div class="profile-options"><button data-person="Fran"><span class="avatar fran">F</span><strong>Soy Fran</strong><span>Puerto Rico</span></button><button data-person="Diana"><span class="avatar diana">D</span><strong>Soy Diana</strong><span>Colombia</span></button></div><button class="text-button" id="chooser-share">Compartir app</button><button class="text-button" id="chooser-close">Cancelar</button></div></dialog>
   <dialog id="editor" aria-labelledby="editor-title"><form id="edit-form"><div class="dialog-heading"><div><p class="eyebrow" id="editor-kicker">NUESTRA HISTORIA</p><h2 id="editor-title">Añadir fecha</h2></div><button class="icon-button" type="button" id="editor-close" aria-label="Cerrar"><span data-icon="x"></span></button></div><div id="editor-fields"></div><p id="form-error" class="form-error hidden" role="alert"></p><div class="dialog-footer"><button id="delete-record" type="button" class="button delete">Eliminar</button><button id="cancel-edit" type="button" class="button secondary">Cancelar</button><button id="save-record" class="button primary" type="submit">Guardar</button></div></form></dialog>
   <dialog id="day-dialog" aria-labelledby="day-title"><div class="dialog-heading"><div><p class="eyebrow">NUESTRO CALENDARIO</p><h2 id="day-title"></h2></div><button id="day-close" class="icon-button" aria-label="Cerrar"><span data-icon="x"></span></button></div><div id="day-events"></div><button id="day-add" class="button primary full"><span data-icon="plus"></span>Añadir evento este día</button></dialog>
   <dialog id="confirm-dialog" aria-labelledby="confirm-title"><h2 id="confirm-title">¿Eliminar este registro?</h2><p>Se eliminará también del otro teléfono.</p><div class="dialog-footer"><button id="confirm-cancel" class="button secondary">Conservar</button><button id="confirm-delete" class="button danger">Sí, eliminar</button></div></dialog>
   <div id="toast" class="toast hidden" role="status"></div>
-  <script type="module" src="./app.js?v=1.1.0"></script>
+  <script type="module" src="./app.js?v=1.2.0"></script>
 </body></html>

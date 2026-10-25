@@ -1,12 +1,12 @@
 import {readFile,writeFile,mkdir,cp,readdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {VERSION as baseVersion} from '../core.js';
-const sources=['index.html','app.js','core.js','updates.js','config.js','styles.css','sw.js','manifest.webmanifest','icon-180.png','icon-192.png','icon-512.png'];
+const sources=['index.html','app.js','core.js','updates.js','access.js','config.js','styles.css','sw.js','manifest.webmanifest','icon-180.png','icon-192.png','icon-512.png'];
 const hash=createHash('sha256');for(const name of sources){hash.update(name);hash.update(await readFile(name));}
 const version=baseVersion+'-'+hash.digest('hex').slice(0,10);
 const output='_site',release=`releases/${version}`,icons=`icons/${version}`;
 await mkdir(`${output}/${release}`,{recursive:true});await mkdir(`${output}/${icons}`,{recursive:true});
-for(const name of ['app.js','core.js','updates.js','config.js','styles.css']){
+for(const name of ['app.js','core.js','updates.js','access.js','config.js','styles.css']){
  let content=await readFile(name,'utf8');
  if(name==='core.js')content=content.replace(`VERSION = '${baseVersion}'`,`VERSION = '${version}'`).replace("ICON_URL = './icon-192.png'",`ICON_URL = './${icons}/icon-192.png'`);
  await writeFile(`${output}/${release}/${name}`,content);
@@ -22,7 +22,7 @@ await writeFile(`${output}/index.html`,html);
 const manifest=JSON.parse(await readFile('manifest.webmanifest','utf8'));manifest.icons.forEach(icon=>icon.src=`./${icons}/${icon.src.split('/').pop()}`);
 await writeFile(`${output}/manifest.webmanifest`,JSON.stringify(manifest,null,2));
 await writeFile(`${output}/version.json`,JSON.stringify({version,baseVersion,release,icons}));
-const shell=['./index.html','./manifest.webmanifest',...['app.js','core.js','updates.js','config.js','styles.css'].map(n=>`./${release}/${n}`),...[180,192,512].map(n=>`./${icons}/icon-${n}.png`)];
+const shell=['./index.html','./manifest.webmanifest',...['app.js','core.js','updates.js','access.js','config.js','styles.css'].map(n=>`./${release}/${n}`),...[180,192,512].map(n=>`./${icons}/icon-${n}.png`)];
 let worker=await readFile('sw.js','utf8');worker=worker.replace('__DF_VERSION__',version).replace('/*__DF_SHELL__*/[]',JSON.stringify(shell));await writeFile(`${output}/sw.js`,worker);
 await writeFile(`${output}/.nojekyll`,'');
 const files=await readdir(output);if(!files.includes('index.html')||!html.includes(release))throw Error('Incomplete release');
