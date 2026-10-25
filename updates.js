@@ -30,7 +30,7 @@ export function createUpdateManager({version,canReload,canActivate=canReload,onP
     if(reloading)return;
     requestActivation();
     if(!canReload()){pendingNotice();return;}
-    if(controllerChanged){const activeVersion=await workerVersion(sw?.controller);reloadOnce(activeVersion||pendingVersion);return;}
+    if(controllerChanged){const activeVersion=await workerVersion(sw?.controller);if(activeVersion===version){controllerChanged=false;return;}reloadOnce(activeVersion||pendingVersion);return;}
     if(pendingVersion&&!registration?.waiting&&!registration?.installing){
       const activeVersion=await workerVersion(sw?.controller||registration?.active);
       if(activeVersion===pendingVersion||!sw||!registration)reloadOnce(pendingVersion);

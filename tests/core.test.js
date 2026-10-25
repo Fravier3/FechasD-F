@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {validDate,eventsOnDate,monthCells,daysBetween,prettyRange,validateEvent,recurrenceInfo} from '../core.js';
+import {validDate,eventsOnDate,monthCells,daysBetween,prettyRange,validateEvent,recurrenceInfo,nextAnnual} from '../core.js';
 test('los rangos de viaje cubren ambos años y sus extremos',()=>{
  const visit={start_date:'2025-12-28',end_date:'2026-01-04',annual:false};
  for(const day of ['2025-12-28','2025-12-31','2026-01-01','2026-01-04'])assert.equal(eventsOnDate([visit],day).length,1);
@@ -36,3 +36,5 @@ test('nuevos aniversarios y cumpleaños usan su año original',()=>{
  assert.equal(recurrenceInfo({start_date:'2030-12-10',annual:true},'2031-12-11').note,'');
  assert.match(recurrenceInfo({start_date:'1997-07-27',annual:true,detailId:'birthday'},'2026-07-27').note,/Nació en 1997/);
 });
+test('un evento futuro no se anuncia antes de su fecha original',()=>{assert.equal(nextAnnual([{start_date:'2030-12-10',annual:true}],'2026-10-25').next,'2030-12-10');});
+test('un aniversario del 29 de febrero encuentra el próximo año bisiesto',()=>{assert.equal(nextAnnual([{start_date:'2024-02-29',annual:true}],'2026-01-01').next,'2028-02-29');});
