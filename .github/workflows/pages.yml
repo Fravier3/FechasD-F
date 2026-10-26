@@ -27,6 +27,7 @@ jobs:
           node-version: '22'
       - name: Verificar y compilar versión atómica
         run: |
+          npm ci
           npm run check
           npm test
           npm run build

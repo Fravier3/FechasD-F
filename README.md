@@ -2,6 +2,16 @@
 
 App compartida con Dashboard, calendario independiente y fichas editables de Diana y Fran. PWA móvil en HTML, CSS y JavaScript, publicada desde `main` en GitHub Pages.
 
+## Entrenamiento · Mis Películas y Series
+
+Biblioteca compartida con contadores dinámicos, búsqueda y filtros combinables (tipo, plataforma, año de visualización y orden). Lista de escritorio que se adapta a tarjetas en móvil, modo claro/oscuro/automático, copiar y exportar CSV. Las exportaciones incluyen las reproducciones de cada título y protegen contra fórmulas de hoja de cálculo.
+
+Se pueden añadir/editar títulos, estado, calificación, notas y múltiples visualizaciones. La eliminación pide confirmación y avisa que afecta ambos teléfonos. Las series importadas no se marcan como terminadas: «Última reproducción» y «Finalización confirmada» son campos distintos. Los nombres y fechas originales del historial se importaron sin corregirlos por fechas de estreno. Las cifras siempre se calculan de los registros; el listado recibido contiene 84 títulos, 34 series y 50 películas.
+
+Tablas independientes `df_media_titles` y `df_media_views`, ambas con el mismo acceso privado y RLS del espacio existente. `database/media.sql` contiene el esquema; los datos personales del historial no se incluyen en los archivos públicos ni se reinsertan al abrir la app. `df_media_save` guarda título e historial en una sola transacción y controla versiones para impedir sobrescrituras entre teléfonos. La clave normalizada impide duplicados por acentos, puntuación o mayúsculas, manteniendo anime y acción real separados.
+
+Carátulas por URL externa, sin subir archivos a Supabase. Cinemeta proporciona búsqueda de metadatos sin clave de pago; se puede elegir otra coincidencia desde Editar o pegar una URL HTTPS. La búsqueda comparte únicamente el nombre del título, nunca sus fechas ni credenciales. Las imágenes usan carga diferida y no se precachean en el service worker; su disponibilidad depende del proveedor externo.
+
 ## Uso
 
 Abrir la dirección normal de la app, escribir el código compartido de cuatro números y elegir Fran o Diana. El dispositivo recuerda el perfil y el acceso. Los datos se guardan en Supabase y se consultan al abrir, al regresar a la app y periódicamente mientras está visible.

@@ -2,6 +2,7 @@ import { VERSION, ICON_URL, COLORS, localISO, parseISO, validDate, fullDate, pre
 import { createUpdateManager, safeToReload } from './updates.js';
 import { SUPABASE_URL, SUPABASE_KEY } from './config.js';
 import { unlockWithCode } from './access.js';
+import { createMediaLibrary } from './media.js';
 
 const $ = id => document.getElementById(id);
 const STORAGE = 'fechasdf-v1';
@@ -22,12 +23,13 @@ const paths={
   link:'<path d="m10 13 4-4m-5-2 3-3a5 5 0 0 1 7 7l-3 3M8 10l-3 3a5 5 0 0 0 7 7l3-3"/>',
   briefcase:'<rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V4h8v3M3 12a20 20 0 0 0 18 0M12 11v4"/>',
   book:'<path d="M12 6C7 2 2 4 2 4v16s5-2 10 2c5-4 10-2 10-2V4s-5-2-10 2Zm0 0v16"/>',
+  tv:'<rect x="3" y="6" width="18" height="14" rx="3"/><path d="m8 2 4 4 4-4M8 23h8m-6-13 5 3-5 3z"/>',
   music:'<path d="M9 18V5l12-2v13M9 8l12-2"/><ellipse cx="6" cy="18" rx="3" ry="3"/><ellipse cx="18" cy="16" rx="3" ry="3"/>',
   check:'<path d="m5 12 4 4L19 6"/>', refresh:'<path d="M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-2l2 3M4 16l2 3a7 7 0 0 0 12-2"/>'
 };
 const icon=(name,cls='')=>`<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.heart}</svg>`;
 function hydrate(root=document){root.querySelectorAll('[data-icon]').forEach(el=>el.innerHTML=icon(el.dataset.icon));}
-const sections=[['dashboard','grid','Dashboard'],['calendar','calendar','Calendario'],['diana','user','Diana'],['fran','user','Fran']];
+const sections=[['dashboard','grid','Dashboard'],['calendar','calendar','Calendario'],['training','tv','Entrenamiento'],['diana','user','Diana'],['fran','user','Fran']];
 document.querySelectorAll('.desktop-nav,.bottom-nav').forEach(nav=>nav.innerHTML=sections.map(([id,glyph,label])=>`<a class="nav-link" href="#${id}" data-section="${id}">${icon(glyph)}<span>${label}</span></a>`).join(''));
 hydrate();
 let access=store.get('access','');
@@ -37,6 +39,7 @@ let person=store.get('person');if(!['Fran','Diana'].includes(person))person=null
 let events=[],details=[],verified=false,online=false,loading=false,section='dashboard',editing=null,toastTimer,deleteResolve,busy=false;
 let monthDate=new Date();monthDate=new Date(monthDate.getFullYear(),monthDate.getMonth(),1,12);
 let selectedDate=localISO(),lastSync=0;
+const media=createMediaLibrary({api,canEdit,isOnline:()=>online,person:()=>nowName(),toast,confirmDelete,storage:store,access:()=>access});
 const nowName=()=>person||'Fran';
 function toast(message){$('toast').textContent=message;$('toast').classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.add('hidden'),4500);}
 function updateProfile(){ $('profile-initial').textContent=person?.[0]||'?';$('profile-name').textContent=person||'Elegir'; }
@@ -48,19 +51,20 @@ async function api(path,{method='GET',body}={}){
   try{
     const response=await fetch(SUPABASE_URL+'/rest/v1/'+path,{method,headers:{apikey:SUPABASE_KEY,'x-client-info':'fechasdf/'+access,'Content-Type':'application/json',Prefer:'return=representation'},body:body===undefined?undefined:JSON.stringify(body),cache:'no-store',signal:controller.signal});
     const text=await response.text();let payload;try{payload=text?JSON.parse(text):null}catch{throw Error('No se pudo leer la respuesta. Intenta de nuevo.');}
-    if(!response.ok){if(response.status===401||response.status===403)throw Error('No se pudo verificar el acceso. Escribe el código nuevamente.');throw Error(payload?.message?.includes('check constraint')?'Revisa las fechas y los campos del formulario.':'No se pudo guardar o cargar. Vuelve a intentarlo.');}
+    if(!response.ok){if(response.status===401||response.status===403)throw Error('No se pudo verificar el acceso. Escribe el código nuevamente.');if(payload?.code==='23505')throw Error('Este título o reproducción ya existe. Edita el registro existente.');if(payload?.code==='P0001')throw Error(payload.message);throw Error(payload?.message?.includes('check constraint')?'Revisa las fechas y los campos del formulario.':'No se pudo guardar o cargar. Vuelve a intentarlo.');}
     return payload;
   }catch(err){if(err.name==='AbortError')throw Error('La conexión tardó demasiado. Intenta de nuevo.');if(err instanceof TypeError)throw Error('Sin conexión. Conecta el teléfono y vuelve a intentar.');throw err;}finally{clearTimeout(timer);}
 }
 function restoreSnapshot(){const cache=store.get('snapshot');if(cache?.access===access&&Array.isArray(cache.events)&&Array.isArray(cache.details)){events=cache.events;details=cache.details;return true;}return false;}
 async function sync({silent=false}={}){
-  if(!access||loading||busy)return;
+  if(!access||loading||busy||media.isBusy())return;
   loading=true;setStatus('Sincronizando…');
   try{
     const allowed=await api('rpc/df_has_access',{method:'POST',body:{}});
     if(allowed!==true){verified=false;online=false;events=[];details=[];access='';store.set('access','');renderAccess('Escribe el código para entrar a su espacio.');return;}
     const [remoteEvents,remoteDetails]=await Promise.all([api('df_events?select=*&order=start_date.asc,created_at.asc'),api('df_details?select=*&order=sort_order.asc,created_at.asc')]);
     events=remoteEvents;details=remoteDetails;verified=true;online=true;lastSync=Date.now();
+    await media.load();
     store.set('snapshot',{access,events,details});setStatus('Sincronizado',true);alertNotice();renderSection();
     if(!person&&!$('chooser').open)showChooser();
   }catch(err){online=false;setStatus('Sin conexión',false);if(!verified&&restoreSnapshot())verified=true;if(verified){renderSection();alertNotice('Sin sincronizar. Puedes consultar la última copia guardada; conecta el teléfono para editar.');}else renderAccess(err.message);if(!silent)toast(err.message);}finally{loading=false;}
@@ -90,9 +94,9 @@ function renderSection(){
   if(!verified)return;
   document.querySelectorAll('[data-section]').forEach(el=>{el.classList.toggle('active',el.dataset.section===section);if(el.dataset.section===section)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');});
   $('add').classList.remove('hidden');$('add').disabled=!online;
-  const setting={dashboard:['NUESTRA HISTORIA','Fechas que nos unen','Cada momento importante, siempre cerquita.','Añadir fecha'],calendar:['DÍA A DÍA','Nuestro calendario','Un día cualquiera puede convertirse en un gran recuerdo.','Nuevo evento'],diana:['CONOCERNOS MEJOR','Los detalles de Diana','Pequeñas cosas que la hacen única.','Añadir detalle'],fran:['CONOCERNOS MEJOR','Los detalles de Fran','Pequeñas cosas que lo hacen único.','Añadir detalle']}[section];
+  const setting={dashboard:['NUESTRA HISTORIA','Fechas que nos unen','Cada momento importante, siempre cerquita.','Añadir fecha'],calendar:['DÍA A DÍA','Nuestro calendario','Un día cualquiera puede convertirse en un gran recuerdo.','Nuevo evento'],training:['PARA RECORDAR','Entrenamiento','Nuestro historial de películas y series, en un solo lugar.','Añadir título'],diana:['CONOCERNOS MEJOR','Los detalles de Diana','Pequeñas cosas que la hacen única.','Añadir detalle'],fran:['CONOCERNOS MEJOR','Los detalles de Fran','Pequeñas cosas que lo hacen único.','Añadir detalle']}[section];
   $('eyebrow').textContent=setting[0];$('page-title').innerHTML=esc(setting[1])+'<span>.</span>';$('page-description').textContent=setting[2];$('add-label').textContent=setting[3];
-  if(section==='dashboard')renderDashboard();else if(section==='calendar')renderCalendar();else renderDetails(section==='diana'?'Diana':'Fran');
+  if(section==='dashboard')renderDashboard();else if(section==='calendar')renderCalendar();else if(section==='training')media.render($('content'));else renderDetails(section==='diana'?'Diana':'Fran');
 }
 function eventCard(e){const formatted=prettyRange(e.start_date,e.end_date);return `<article class="date-card ${COLORS.includes(e.color)?e.color:'rose'}"><div class="card-top"><div class="card-icon">${icon(e.icon)}</div><button class="card-edit" data-edit-event="${esc(e.id)}" aria-label="Editar ${esc(e.title)}" ${online?'':'disabled'}>${icon('pencil')}</button></div><h3>${esc(e.title)}</h3><p class="date-value">${esc(formatted.main)}</p>${formatted.year?`<span class="date-year">${formatted.year}</span>`:''}${e.place?`<p class="date-location">${icon('pin')}${esc(e.place)}</p>`:''}${e.notes?`<div class="notes">${esc(e.notes)}</div>`:''}</article>`;}
 function wireEventEdits(root=$('content')){root.querySelectorAll('[data-edit-event]').forEach(b=>b.onclick=()=>openEvent(events.find(e=>e.id===b.dataset.editEvent)));}
@@ -131,7 +135,7 @@ function openDetail(who,record=null){if(!prepareEditor('detail',record,record?'E
   $('editor-fields').innerHTML=field('detail-label','Nombre del detalle','text',record?.label||'','required maxlength="100" placeholder="Por ejemplo: Comida favorita"')+`<label for="detail-kind">Tipo de dato</label><select id="detail-kind">${option('text','Texto',record?.kind||'text')}${option('date','Fecha',record?.kind)}</select><div id="detail-value-slot"></div>`;
   const renderValue=(value='')=>{$('detail-value-slot').innerHTML=$('detail-kind').value==='date'?field('detail-value','Fecha','date',value,'required min="1900-01-01" max="2200-12-31"'):`<label for="detail-value">Detalle de ${esc(who)}</label><textarea id="detail-value" required maxlength="2000" placeholder="Escribe el detalle…">${esc(value)}</textarea>`;};renderValue(record?.value||'');$('detail-kind').onchange=()=>{const value=$('detail-value').value;renderValue($('detail-kind').value==='text'||validDate(value)?value:'');};$('editor').showModal();$('detail-label').focus();
 }
-$('add').onclick=()=>{if(section==='diana'||section==='fran')openDetail(section==='diana'?'Diana':'Fran');else openEvent(null,section==='calendar'?selectedDate:null,section==='dashboard');};
+$('add').onclick=()=>{if(section==='training')media.open();else if(section==='diana'||section==='fran')openDetail(section==='diana'?'Diana':'Fran');else openEvent(null,section==='calendar'?selectedDate:null,section==='dashboard');};
 function closeEditor(){if(busy)return;$('editor').close();editing=null;}
 $('editor-close').onclick=$('cancel-edit').onclick=closeEditor;
 $('editor').addEventListener('cancel',e=>{if(busy)e.preventDefault();else editing=null;});
@@ -152,7 +156,7 @@ window.addEventListener('offline',()=>{online=false;setStatus('Sin conexión',fa
 window.addEventListener('online',()=>sync({silent:true}));
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){sync({silent:true});updater.check();}});
 setInterval(()=>{if(document.visibilityState==='visible'&&Date.now()-lastSync>25000)sync({silent:true});},30000);
-const hasOpenWork=()=>busy||!!document.querySelector('dialog[open]')||!!document.querySelector('#access-code')?.value;
+const hasOpenWork=()=>busy||media.isBusy()||!!document.querySelector('dialog[open]')||!!document.querySelector('#access-code')?.value;
 const updater=createUpdateManager({version:VERSION,canActivate:()=>!hasOpenWork(),canReload:()=>safeToReload({busy,dialogsOpen:hasOpenWork(),hidden:document.visibilityState!=='visible'}),onPending:()=>toast('Hay una actualización lista. Se aplicará cuando cierres el formulario.')});
 document.querySelectorAll('dialog').forEach(dialog=>dialog.addEventListener('close',()=>updater.resume()));
 window.addEventListener('pageshow',()=>updater.check());
