@@ -23,6 +23,8 @@ export function validateMedia(t,views){
  return '';
 }
 export const shortDate=s=>s?s.split('-').reverse().join('/'):'—';
+// Presentation only: ISO values, sorting, editor inputs and CSV remain unchanged.
+export function visualDate(value){if(!validDate(value))return '—';const [year,month,day]=value.split('-');return `${day}/${['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][Number(month)-1]}/${year}`;}
 export function mediaText(rows){return rows.map(t=>`${t.name} | ${t.type} | ${observations(t).map(v=>`${v.platform}: Inicio ${shortDate(v.start_date)} · Finalizada ${shortDate(v.last_date||v.start_date)}`).join('; ')} | ${t.status}`).join('\n');}
 const csvCell=v=>'"'+String(v??'').replace(/^[=+@\-\t\r]/,"'$&").replaceAll('"','""')+'"';
 export function mediaCSV(rows){const out=[['Título','Tipo','Inicio','Finalizada','Plataforma','Estado','Calificación','Notas']];for(const t of rows)for(const v of observations(t))out.push([t.name,t.type,shortDate(v.start_date),shortDate(v.last_date||v.start_date),v.platform,t.status,t.rating,t.notes]);return '\uFEFF'+out.map(r=>r.map(csvCell).join(',')).join('\r\n');}

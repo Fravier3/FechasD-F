@@ -40,7 +40,8 @@ test('app startup and media UI: filters, add, edit, replay, confirmation, offlin
   for(const nav of w.document.querySelectorAll('.desktop-nav,.bottom-nav'))assert.deepEqual([...nav.querySelectorAll('[data-section]')].map(a=>a.textContent),['Dashboard','Calendario','Diana','Fran','Entretenimiento']);
   assert.equal($('page-title').textContent,'Entretenimiento.');
   assert.match($('media-count').textContent,/2 de 2/);
-  assert.match($('media-period').textContent,/30\/11\/2025 — 06\/01\/2026/);
+  assert.match($('media-period').textContent,/30\/Nov\/2025 — 06\/Ene\/2026/);
+  assert.match(w.document.querySelector('.media-date-cell').textContent,/30\/Nov\/2025/);
   $('media-query').value='pelicula';$('media-query').dispatchEvent(new w.Event('input'));
   assert.match($('media-count').textContent,/1 de 2/);
   await $('sync').onclick();assert.equal($('media-query').value,'pelicula','background refresh preserves search');
@@ -56,6 +57,7 @@ test('app startup and media UI: filters, add, edit, replay, confirmation, offlin
   w.document.querySelector('[data-media-edit="00000000-0000-0000-0000-000000000001"]').click();
   $('media-status').value='Viendo';$('media-status').dispatchEvent(new w.Event('change'));$('media-add-view').click();
   const views=w.document.querySelectorAll('.media-view-row');assert.equal(views.length,2);views[1].querySelector('[data-view-start]').value='2026-10-26';
+  assert.equal(views[0].querySelector('[data-view-start]').value,'2025-11-30','visual formatting never changes ISO input dates');
   assert.equal(views[0].querySelector('[data-view-start]').getAttribute('aria-label'),'Inicio');
   assert.equal(views[0].querySelector('[data-view-last]').getAttribute('aria-label'),'Finalizada');
   await $('media-form').onsubmit(new w.Event('submit',{cancelable:true}));

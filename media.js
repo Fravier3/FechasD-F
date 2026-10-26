@@ -1,5 +1,5 @@
 import {escapeHTML as esc,localISO} from './core.js';
-import {PLATFORMS,STATUSES,observations,datesOf,mediaStats,filterMedia,normalizeTitle,validateMedia,shortDate,mediaText,mediaCSV} from './media-core.js';
+import {PLATFORMS,STATUSES,observations,datesOf,mediaStats,filterMedia,normalizeTitle,validateMedia,visualDate as shortDate,mediaText,mediaCSV} from './media-core.js';
 import {findCovers} from './covers.js';
 
 export function createMediaLibrary({api,canEdit,isOnline,person,toast,confirmDelete,storage,access}){

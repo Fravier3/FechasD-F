@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {normalizeTitle,mediaStats,filterMedia,datesOf,validateMedia,mediaCSV,mediaText} from '../media-core.js';
+import {normalizeTitle,mediaStats,filterMedia,datesOf,validateMedia,mediaCSV,mediaText,visualDate} from '../media-core.js';
 import {exactCover,findCovers} from '../covers.js';
 const movie={id:'a',name:'¡Película, Ágil!',type:'Película',status:'Sin confirmar',rating:null,notes:'',df_media_views:[{platform:'Netflix',start_date:'2025-09-14',last_date:'2025-09-14'},{platform:'Max',start_date:'2026-01-05',last_date:'2026-01-05'}]};
 const series={id:'b',name:'Una Serie',type:'Serie',status:'Sin confirmar',rating:null,df_media_views:[{platform:'Netflix',start_date:'2025-11-30',last_date:'2026-01-06'}]};
+test('visual dates use Spanish months without changing values or numeric CSV',()=>{const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];for(let m=1;m<=12;m++)assert.equal(visualDate(`2026-${String(m).padStart(2,'0')}-15`),`15/${months[m-1]}/2026`);assert.equal(visualDate('2026-10-03'),'03/Oct/2026');assert.equal(visualDate(null),'—');assert.equal(visualDate('2026-02-30'),'—');assert.match(mediaCSV([series]),/30\/11\/2025/);assert.equal(series.df_media_views[0].start_date,'2025-11-30');});
 test('stats count titles, not episodes or replays; true period spans years',()=>assert.deepEqual(mediaStats([movie,series]),{total:2,series:1,movies:1,first:'2025-09-14',last:'2026-01-06'}));
 test('accent, case and punctuation insensitive deduplication keeps anime vs live action distinct',()=>{assert.equal(normalizeTitle('¡Película, Ágil!'),normalizeTitle('PELICULA AGIL'));assert.notEqual(normalizeTitle('One Piece (anime)'),normalizeTitle('ONE PIECE (acción real)'));});
 test('combined platform/year filters must match the same observation',()=>{assert.equal(filterMedia([movie],{platform:'Netflix',year:'2026'}).length,0);assert.equal(filterMedia([movie],{platform:'Max',year:'2026',query:'agil',type:'Película'}).length,1);});
