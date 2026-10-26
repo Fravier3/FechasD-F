@@ -1,5 +1,5 @@
 import {validDate} from './core.js';
-export const PLATFORMS=['Netflix','Disney+','Max','Prime Video','Apple TV+','Paramount+','Hulu','Peacock','Otra'];
+export const PLATFORMS=['Netflix','Plex','Disney+','Max','Prime Video','Apple TV+','Paramount+','Hulu','Peacock','Otra'];
 export const STATUSES=['Sin confirmar','Pendiente','Viendo','Terminada'];
 export const normalizeTitle=s=>String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
 export const observations=t=>t.df_media_views||[];

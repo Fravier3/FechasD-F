@@ -49,8 +49,10 @@ test('app startup and media UI: filters, add, edit, replay, confirmation, offlin
   $('add').click();assert.equal($('media-editor').open,true);assert.equal($('media-completed'),null,'no third date control');
   assert.equal($('media-fields').querySelectorAll('input[type="date"]').length,2);
   assert.equal($('media-rating').parentElement.className,'media-rating-field','rating has a full-width aligned row');
+  w.document.querySelector('[data-view-platform]').value='Plex';
   $('media-name').value='Título nuevo';await $('media-form').onsubmit(new w.Event('submit',{cancelable:true}));
   assert.equal($('media-editor').open,false);assert.match($('media-count').textContent,/3 de 3/);assert.equal(records.at(-1).df_media_views[0].start_date,null,'pending does not invent dates');
+  assert.equal(records.at(-1).df_media_views[0].platform,'Plex','Plex can be saved from the editor');
   w.document.querySelector('[data-media-edit="00000000-0000-0000-0000-000000000001"]').click();
   $('media-status').value='Viendo';$('media-status').dispatchEvent(new w.Event('change'));$('media-add-view').click();
   const views=w.document.querySelectorAll('.media-view-row');assert.equal(views.length,2);views[1].querySelector('[data-view-start]').value='2026-10-26';

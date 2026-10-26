@@ -2,9 +2,11 @@
 
 App compartida con Dashboard, calendario independiente y fichas editables de Diana y Fran. PWA móvil en HTML, CSS y JavaScript, publicada desde `main` en GitHub Pages.
 
-## Entrenamiento · Mis Películas y Series
+## Entretenimiento · Mis Películas y Series
 
 Biblioteca compartida con contadores dinámicos, búsqueda y filtros combinables (tipo, plataforma, año de visualización y orden). Lista de escritorio que se adapta a tarjetas en móvil, modo claro/oscuro/automático, copiar y exportar CSV. Las exportaciones incluyen las reproducciones de cada título y protegen contra fórmulas de hoja de cálculo.
+
+Plex es una plataforma independiente de Netflix, disponible en filtros, formularios y exportaciones. `database/plex-platform.sql` amplía la lista permitida sin cambiar políticas de acceso ni registros anteriores. Los historiales personales se importan directamente en Supabase, no se publican en este repositorio ni se reimportan al abrir la app.
 
 Se pueden añadir/editar títulos, estado, calificación, notas y múltiples visualizaciones. La eliminación pide confirmación y avisa que afecta ambos teléfonos. Se muestran solo dos fechas por título o reproducción: «Inicio» y «Finalizada», tomadas de la primera y última visualización guardada. El campo independiente de finalización no se muestra. A petición del propietario, el 26 de octubre de 2026 se marcaron los 82 títulos existentes como Terminada, sin modificar fechas ni recuperar registros eliminados. Los contadores se calculan de los registros actuales.
 

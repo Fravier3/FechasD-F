@@ -21,7 +21,7 @@ create table public.df_media_titles (
 create table public.df_media_views (
  id uuid primary key default gen_random_uuid(),
  title_id uuid not null references public.df_media_titles(id) on delete cascade,
- platform text not null check(platform in ('Netflix','Disney+','Max','Prime Video','Apple TV+','Paramount+','Hulu','Peacock','Otra')),
+ platform text not null check(platform in ('Netflix','Plex','Disney+','Max','Prime Video','Apple TV+','Paramount+','Hulu','Peacock','Otra')),
  start_date date, last_date date,
  check(last_date is null or (start_date is not null and last_date>=start_date)),
  unique nulls not distinct(title_id,platform,start_date,last_date)
