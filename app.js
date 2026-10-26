@@ -29,7 +29,7 @@ const paths={
 };
 const icon=(name,cls='')=>`<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.heart}</svg>`;
 function hydrate(root=document){root.querySelectorAll('[data-icon]').forEach(el=>el.innerHTML=icon(el.dataset.icon));}
-const sections=[['dashboard','grid','Dashboard'],['calendar','calendar','Calendario'],['training','tv','Entrenamiento'],['diana','user','Diana'],['fran','user','Fran']];
+const sections=[['dashboard','grid','Dashboard'],['calendar','calendar','Calendario'],['diana','user','Diana'],['fran','user','Fran'],['training','tv','Entretenimiento']];
 document.querySelectorAll('.desktop-nav,.bottom-nav').forEach(nav=>nav.innerHTML=sections.map(([id,glyph,label])=>`<a class="nav-link" href="#${id}" data-section="${id}">${icon(glyph)}<span>${label}</span></a>`).join(''));
 hydrate();
 let access=store.get('access','');
@@ -94,7 +94,7 @@ function renderSection(){
   if(!verified)return;
   document.querySelectorAll('[data-section]').forEach(el=>{el.classList.toggle('active',el.dataset.section===section);if(el.dataset.section===section)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');});
   $('add').classList.remove('hidden');$('add').disabled=!online;
-  const setting={dashboard:['NUESTRA HISTORIA','Fechas que nos unen','Cada momento importante, siempre cerquita.','Añadir fecha'],calendar:['DÍA A DÍA','Nuestro calendario','Un día cualquiera puede convertirse en un gran recuerdo.','Nuevo evento'],training:['PARA RECORDAR','Entrenamiento','Nuestro historial de películas y series, en un solo lugar.','Añadir título'],diana:['CONOCERNOS MEJOR','Los detalles de Diana','Pequeñas cosas que la hacen única.','Añadir detalle'],fran:['CONOCERNOS MEJOR','Los detalles de Fran','Pequeñas cosas que lo hacen único.','Añadir detalle']}[section];
+  const setting={dashboard:['NUESTRA HISTORIA','Fechas que nos unen','Cada momento importante, siempre cerquita.','Añadir fecha'],calendar:['DÍA A DÍA','Nuestro calendario','Un día cualquiera puede convertirse en un gran recuerdo.','Nuevo evento'],training:['PARA RECORDAR','Entretenimiento','Nuestro historial de películas y series, en un solo lugar.','Añadir título'],diana:['CONOCERNOS MEJOR','Los detalles de Diana','Pequeñas cosas que la hacen única.','Añadir detalle'],fran:['CONOCERNOS MEJOR','Los detalles de Fran','Pequeñas cosas que lo hacen único.','Añadir detalle']}[section];
   $('eyebrow').textContent=setting[0];$('page-title').innerHTML=esc(setting[1])+'<span>.</span>';$('page-description').textContent=setting[2];$('add-label').textContent=setting[3];
   if(section==='dashboard')renderDashboard();else if(section==='calendar')renderCalendar();else if(section==='training')media.render($('content'));else renderDetails(section==='diana'?'Diana':'Fran');
 }

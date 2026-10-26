@@ -37,6 +37,8 @@ test('app startup and media UI: filters, add, edit, replay, confirmation, offlin
   assert.equal(w.document.querySelectorAll('.media-date-cell small').length,4,'exactly two date labels per title');
   assert.deepEqual([...w.document.querySelectorAll('.media-date-cell small')].map(e=>e.textContent),['Inicio','Finalizada','Inicio','Finalizada']);
   assert.equal(w.document.querySelectorAll('[data-section="training"]').length,2);
+  for(const nav of w.document.querySelectorAll('.desktop-nav,.bottom-nav'))assert.deepEqual([...nav.querySelectorAll('[data-section]')].map(a=>a.textContent),['Dashboard','Calendario','Diana','Fran','Entretenimiento']);
+  assert.equal($('page-title').textContent,'Entretenimiento.');
   assert.match($('media-count').textContent,/2 de 2/);
   assert.match($('media-period').textContent,/30\/11\/2025 — 06\/01\/2026/);
   $('media-query').value='pelicula';$('media-query').dispatchEvent(new w.Event('input'));
