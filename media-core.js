@@ -23,6 +23,6 @@ export function validateMedia(t,views){
  return '';
 }
 export const shortDate=s=>s?s.split('-').reverse().join('/'):'—';
-export function mediaText(rows){return rows.map(t=>`${t.name} | ${t.type} | ${observations(t).map(v=>`${v.platform}: ${shortDate(v.start_date)}${v.last_date&&v.last_date!==v.start_date?' – '+shortDate(v.last_date):''}`).join('; ')} | ${t.status}`).join('\n');}
+export function mediaText(rows){return rows.map(t=>`${t.name} | ${t.type} | ${observations(t).map(v=>`${v.platform}: Inicio ${shortDate(v.start_date)} · Finalizada ${shortDate(v.last_date||v.start_date)}`).join('; ')} | ${t.status}`).join('\n');}
 const csvCell=v=>'"'+String(v??'').replace(/^[=+@\-\t\r]/,"'$&").replaceAll('"','""')+'"';
-export function mediaCSV(rows){const out=[['Título','Tipo','Fecha de visualización','Fecha de inicio','Última reproducción','Fecha de finalización confirmada','Plataforma','Estado','Calificación','Notas']];for(const t of rows)for(const v of observations(t))out.push([t.name,t.type,t.type==='Película'?shortDate(v.start_date):'',t.type==='Serie'?shortDate(v.start_date):'',shortDate(v.last_date),t.completed_on?shortDate(t.completed_on):'',v.platform,t.status,t.rating,t.notes]);return '\uFEFF'+out.map(r=>r.map(csvCell).join(',')).join('\r\n');}
+export function mediaCSV(rows){const out=[['Título','Tipo','Inicio','Finalizada','Plataforma','Estado','Calificación','Notas']];for(const t of rows)for(const v of observations(t))out.push([t.name,t.type,shortDate(v.start_date),shortDate(v.last_date||v.start_date),v.platform,t.status,t.rating,t.notes]);return '\uFEFF'+out.map(r=>r.map(csvCell).join(',')).join('\r\n');}
